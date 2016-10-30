@@ -1,12 +1,18 @@
 from flask import jsonify, request, current_app, url_for
 from . import api
-from ..models import User, Post
+from ..models import User, Post, Category
 
 
 @api.route('/users/<int:id>')
 def get_user(id):
     user = User.query.get_or_404(id)
     return jsonify(user.to_json())
+
+
+@api.route('/categorys/<int:id>')
+def get_categorys(id):
+    categorys = Category.query.get_or_404(id)
+    return jsonify(categorys.to_json())
 
 
 @api.route('/users/<int:id>/posts/')

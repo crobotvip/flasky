@@ -60,6 +60,19 @@ class Follow(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Category(db.Model):
+    __tablename__ = 'categorys'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True, index=True)
+
+    def to_json(self):
+        json_user = {
+            'id': self.id,
+            'name': self.name
+        }
+        return json_user
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
