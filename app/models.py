@@ -73,6 +73,21 @@ class Category(db.Model):
         return json_user
 
 
+class Case(db.Model):
+    __tablename__ = 'cases'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), unique=True, index=True)
+    img = db.Column(db.String(64), index=True)
+
+    def to_json(self):
+        json_user = {
+            'id': self.id,
+            'name': self.name,
+            'img' : self.img
+        }
+        return json_user
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -148,9 +163,43 @@ class User(UserMixin, db.Model):
 
     @password.setter
     def password(self, password):
+        """Hash a password with the given method and salt with with a string of
+            the given length.  The format of the string returned includes the method
+            that was used so that :func:`check_password_hash` can check the hash.
+
+            The format for the hashed string looks like this::
+
+                method$salt$hash
+
+            This method can **not** generate unsalted passwords but it is possible
+            to set the method to plain to enforce plaintext passwords.  If a salt
+            is used, hmac is used internally to salt the password.
+
+            If PBKDF2 is wanted it can be enabled by setting the method to
+            ``pbkdf2:method:iterations`` where iterations is optional::
+
+                pbkdf2:sha1:2000$salt$hash
+                pbkdf2:sha1$salt$hash
+
+            :param password: the password to hash.
+            :param method: the hash method to use (one that hashlib supports). Can
+                           optionally be in the format ``pbkdf2:<method>[:iterations]``
+                           to enable PBKDF2.
+            :param salt_length: the length of the salt in letters.
+            """
         self.password_hash = generate_password_hash(password)
 
     def verify_password(self, password):
+        """check a password against a given salted and hashed password value.
+            In order to support unsalted legacy passwords this method supports
+            plain text passwords, md5 and sha1 hashes (both salted and unsalted).
+
+            Returns `True` if the password matched, `False` otherwise.
+
+            :param pwhash: a hashed string like returned by
+                           :func:`generate_password_hash`.
+            :param password: the plaintext password to compare against the hash.
+            """
         return check_password_hash(self.password_hash, password)
 
     def generate_confirmation_token(self, expiration=3600):

@@ -57,6 +57,16 @@ def index():
                            show_followed=show_followed, pagination=pagination)
 
 
+@main.route('/about', methods=['GET', 'POST'])
+def about():
+    return render_template('about.html')
+
+
+@main.route('/case', methods=['GET', 'POST'])
+def case():
+    return render_template('case.html')
+
+
 @main.route('/user/<username>')
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
@@ -151,6 +161,21 @@ def edit(id):
         return redirect(url_for('.post', id=post.id))
     form.body.data = post.body
     return render_template('edit_post.html', form=form)
+
+
+@main.route('/delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete(id):
+    post = Post.query.get_or_404(id)
+    if current_user != post.author and \
+            not current_user.can(Permission.ADMINISTER):
+        abort(404)
+    db.session.delete(post)
+    flash('The post has been updated.')
+    return redirect(url_for('.index'))
+
+
+
 
 
 @main.route('/follow/<username>')
